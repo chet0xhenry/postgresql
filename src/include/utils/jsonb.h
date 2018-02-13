@@ -378,6 +378,7 @@ extern char *JsonbToCString(StringInfo out, JsonbContainer *in,
 			   int estimated_len);
 extern char *JsonbToCStringIndent(StringInfo out, JsonbContainer *in,
 					 int estimated_len);
+extern Datum JsonbFromCString(char *json, int len);
 
 
 #endif							/* __JSONB_H__ */

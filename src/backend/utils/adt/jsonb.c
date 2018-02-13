@@ -217,6 +217,18 @@ jsonb_typeof(PG_FUNCTION_ARGS)
 }
 
 /*
+ * JsonbFromCString
+ *	   Converts C-string to jsonb datum.
+ *
+ * Uses the below internal function to construct a jsonb.
+ */
+Datum
+JsonbFromCString(char *json, int len);
+{
+	return jsonb_from_cstring(json, len);
+}
+
+/*
  * jsonb_from_cstring
  *
  * Turns json string into a jsonb Datum.
@@ -479,7 +491,7 @@ JsonbToCStringWorker(StringInfo out, JsonbContainer *in, int estimated_len, bool
 		{
 			case WJB_BEGIN_ARRAY:
 				if (!first)
-					appendBinaryStringInfo(out, ", ", ispaces);
+					appendBinaryStringInfo(out, ",", ispaces);
 
 				if (!v.val.array.rawScalar)
 				{
@@ -494,7 +506,7 @@ JsonbToCStringWorker(StringInfo out, JsonbContainer *in, int estimated_len, bool
 				break;
 			case WJB_BEGIN_OBJECT:
 				if (!first)
-					appendBinaryStringInfo(out, ", ", ispaces);
+					appendBinaryStringInfo(out, ",", ispaces);
 
 				add_indent(out, use_indent && !last_was_key, level);
 				appendStringInfoCharMacro(out, '{');
@@ -504,14 +516,14 @@ JsonbToCStringWorker(StringInfo out, JsonbContainer *in, int estimated_len, bool
 				break;
 			case WJB_KEY:
 				if (!first)
-					appendBinaryStringInfo(out, ", ", ispaces);
+					appendBinaryStringInfo(out, ",", ispaces);
 				first = true;
 
 				add_indent(out, use_indent, level);
 
 				/* json rules guarantee this is a string */
 				jsonb_put_escaped_value(out, &v);
-				appendBinaryStringInfo(out, ": ", 2);
+				appendBinaryStringInfo(out, ":", 2);
 
 				type = JsonbIteratorNext(&it, &v, false);
 				if (type == WJB_VALUE)
@@ -533,7 +545,7 @@ JsonbToCStringWorker(StringInfo out, JsonbContainer *in, int estimated_len, bool
 				break;
 			case WJB_ELEM:
 				if (!first)
-					appendBinaryStringInfo(out, ", ", ispaces);
+					appendBinaryStringInfo(out, ",", ispaces);
 				first = false;
 
 				if (!raw_scalar)
